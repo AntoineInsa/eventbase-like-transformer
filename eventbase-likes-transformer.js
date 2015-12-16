@@ -1,3 +1,8 @@
+formatDate = function(date) {
+  date = date || new Date()
+  return date.toISOString().replace(/\.\d{3}/,'')
+}
+
 convertEventbaseToAttendeaseLikes = function(eventbaseLikes) {
   var attendeaseLikes = {
     'like':[],
@@ -23,10 +28,8 @@ convertEventbaseToAttendeaseLikes = function(eventbaseLikes) {
 }
 
 convertAttendeaseToEventbaseLikes = function(attendeaseLikes, callback) {
-  var date = new Date();
-
   var eventbaseLikes = {
-    'version':date.toISOString(),
+    'version':formatDate(new Date()),
     'schedule_list':[]
   }
 

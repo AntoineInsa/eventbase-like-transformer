@@ -1,4 +1,4 @@
-var likes = require('./eventbase-likes-transformer.js');
+var likes = require('./index.js');
 
 // Simulate AWS lambda context
 var context = {
@@ -100,11 +100,11 @@ var events = {
       // like one
       {'object_id': template.object1,
       'timestamp': currentDate(-0.1),
-      'value': 0},
+      'value': 1},
       // and unlike it after
       {'object_id': template.object1,
       'timestamp': currentDate(0),
-      'value': 1}]
+      'value': 0}]
   }
 }
 

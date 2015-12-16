@@ -1,7 +1,3 @@
-// ---- Definitions ----
-
-var environment = 'preview'
-
 convertEventbaseToAttendeaseLikes = function(eventbaseLikes) {
   var attendeaseLikes = {
     'like':[],
@@ -13,13 +9,11 @@ convertEventbaseToAttendeaseLikes = function(eventbaseLikes) {
     attendeaseLike = {
       "type"      : 'session',
       "id"        : like.object_id,
-      "rating"    : like.value,
       "timestamp" : like.timestamp
     }
-    if (like.value) {
+    if (like.value == "1") {
       attendeaseLikes.like.push(attendeaseLike)
     }
-    // if null or 0
     else {
       attendeaseLikes.unlike.push(attendeaseLike)
     }
@@ -28,9 +22,11 @@ convertEventbaseToAttendeaseLikes = function(eventbaseLikes) {
   return attendeaseLikes
 }
 
-convertAttendeaseToEventbaseLikes = function(attendeaseLikes) {
+convertAttendeaseToEventbaseLikes = function(attendeaseLikes, callback) {
+  var date = new Date();
+
   var eventbaseLikes = {
-    'version':currentDate(),
+    'version':date.toISOString(),
     'schedule_list':[]
   }
 
@@ -40,7 +36,7 @@ convertAttendeaseToEventbaseLikes = function(attendeaseLikes) {
     if (like.type == 'session') {
       eventbaseLike = {
         "object_id" : like.id,
-        "value"     : 1,
+        "value"     : "1",
         "timestamp" : like.timestamp
       }
       eventbaseLikes.schedule_list.push(eventbaseLike)
@@ -53,50 +49,33 @@ convertAttendeaseToEventbaseLikes = function(attendeaseLikes) {
     if (like.type == 'session') {
       eventbaseLike = {
         "object_id" : like.id,
-        "value"     : null,
+        "value"     : "0",
         "timestamp" : like.timestamp
       }
       eventbaseLikes.schedule_list.push(eventbaseLike)
     }
   }
 
-  return eventbaseLikes
-}
-
-mySimpleRequest = function(options,success,error) {
-  var request = require('request')
-
-  request(options, function (e, res, body) {
-    if (e) {
-      console.log('error')
-      error(e)
-    }
-    console.log('succes')
-    success(body)
-  })
-
+  callback(eventbaseLikes)
 }
 
 mySimpleHttps = function(options,success,error) {
-
   var https = require('https')
 
-  var simpleOptions = {
-    // hostname: 'encrypted.google.com',
-    // path: '/',
-    url: options.url,
-    method: options.method,
-    json: true,
-    body: options.body
+  var postOptions = {
+    hostname: options.hostname,
+    path: options.path,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': options.body.length
+    }
   };
 
-
-  var req = https.request(simpleOptions, function(res) {
-    console.log("statusCode: ", res.statusCode)
-    console.log("headers: ", res.headers)
+  var req = https.request(postOptions, function(res) {
+    res.setEncoding('utf8');
 
     var body = ''
-
     res.on('data', function(d) {
       body += d
     });
@@ -106,20 +85,19 @@ mySimpleHttps = function(options,success,error) {
       success(body)
     })
 
-    req.on('error', function(e) {
-      error(e)
-    })
-
   })
+
+  req.on('error', function(e) {
+    error(e)
+  })
+
+  req.write(options.body);
   req.end()
 }
 
 postLikes = function(event,context,callback) {
-  // 2. POST
-  var url = 'https://' + event.event_id + '.' + environment + '.attendease.com/api/v2/likes.json'
-
   var postData = {
-    'attendee_token':event.token,
+    'attendee_token':event.attendee_token,
     'since':event.version,
     'unlikes':true,
     'like':clientLikes.like,
@@ -127,10 +105,9 @@ postLikes = function(event,context,callback) {
   }
 
   var options = {
-    url: url,
-    method: 'post',
-    json: true,
-    body: postData
+    hostname: event.event_id + '.' + event.api_host,
+    path: '/api/v2/likes.json',
+    body: JSON.stringify(postData)
   }
 
   postSuccess = function(body) {
@@ -139,24 +116,28 @@ postLikes = function(event,context,callback) {
     // console.log("Server likes")
     // console.log(body)
 
-    result = callback(body)
-    console.log(result)
-    context.succeed(result);
+    callback(body, context)
   }
 
   postError = function(e) {
     console.log('Error')
     console.log(e)
-    context.succeed({"error":"Could not authenticate you."});
-    return
+    context.done(null, 'Error');
   }
 
-  mySimpleRequest(options, postSuccess, postError)
-  // mySimpleHttps(options, postSuccess, postError)
+  //mySimpleRequest(options, postSuccess, postError)
+  mySimpleHttps(options, postSuccess, postError)
+}
+
+convertAndFinish = function(result, context)
+{
+  convertAttendeaseToEventbaseLikes(result, function(converted){
+    context.succeed(converted);
+  })
 }
 
 // ---- Main ----
 exports.handler = function(event, context) {
-  clientLikes = convertEventbaseToAttendeaseLikes(event,context)
-  postLikes(event,context,convertAttendeaseToEventbaseLikes)
+  clientLikes = convertEventbaseToAttendeaseLikes(event)
+  postLikes(event,context,convertAndFinish)
 }

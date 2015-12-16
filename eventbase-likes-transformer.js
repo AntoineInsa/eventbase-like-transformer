@@ -84,8 +84,16 @@ mySimpleHttps = function(options,success,error) {
     });
 
     res.on('end', function() {
-      body = JSON.parse(body)
-      success(body)
+      if (res.statusCode != '200')
+      {
+        error({
+          'status':res.statusCode,
+        })
+      }
+      else {
+        body = JSON.parse(body)
+        success(body)
+      }
     })
 
   })
@@ -125,7 +133,7 @@ postLikes = function(event,context,callback) {
   postError = function(e) {
     console.log('Error')
     console.log(e)
-    context.done(null, 'Error');
+    context.done(null, e);
   }
 
   //mySimpleRequest(options, postSuccess, postError)

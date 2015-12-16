@@ -1,6 +1,6 @@
 ### Setup
 
-    Update test.js with correct `api_host`, `event_id`, and `token`.
+    Update test.js with correct `api_host`, `event_id`, and `attendease_token`.
 
 ### Testing
 

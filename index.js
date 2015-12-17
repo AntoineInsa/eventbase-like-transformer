@@ -108,7 +108,7 @@ mySimpleHttps = function(options,success,error) {
 
 postLikes = function(event,context,callback) {
   var postData = {
-    'attendee_token':event.attendease_token,
+    'attendee_token':event.attendee_token,
     'since':event.version,
     'unlikes':true,
     'like':clientLikes.like,

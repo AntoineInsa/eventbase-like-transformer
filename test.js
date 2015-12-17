@@ -33,7 +33,7 @@ var offset = 0
 var eventTemplate = {
   'api_host': 'attendease.com',
   'event_id': 'eventbase',
-  'attendease_token': 'this-is-a-secret-attendee-token',
+  'attendee_token': 'this-is-a-secret-attendee-token',
   'schedule_list': []
 };
 
@@ -41,7 +41,7 @@ var eventTemplate = {
 var template = {
   'api_host': 'attendease.com',
   'event_id': 'eventbase',
-  'token': 'this-is-a-secret-attendee-token',
+  'attendee_token': 'this-is-a-secret-attendee-token',
   'object1': 'object1_id',
   'object2': 'object2_id',
   'version': currentDate(-1.1)
@@ -51,20 +51,20 @@ var events = {
   'firstSync' : {
     'api_host': template.api_host,
     'event_id': template.event_id,
-    'attendease_token': template.token,
+    'attendee_token': template.attendee_token,
     'schedule_list': []
   },
   'secondSync' : {
     'api_host': template.api_host,
     'event_id': template.event_id,
-    'attendease_token': template.token,
+    'attendee_token': template.attendee_token,
     'version': currentDate(-1),
     'schedule_list': []
   },
   'likeOneUnlikeTwo' : {
     'api_host': template.api_host,
     'event_id': template.event_id,
-    'attendease_token': template.token,
+    'attendee_token': template.attendee_token,
     'version': template.version,
     'schedule_list': [
       // like one
@@ -79,7 +79,7 @@ var events = {
   'unlikeOneLikeTwo' : {
     'api_host': template.api_host,
     'event_id': template.event_id,
-    'attendease_token': template.token,
+    'attendee_token': template.attendee_token,
     'version': template.version,
     'schedule_list': [
       // unlike one
@@ -94,7 +94,7 @@ var events = {
   'likeAndUnlikeOne' : {
     'api_host': template.api_host,
     'event_id': template.event_id,
-    'attendease_token': template.token,
+    'attendee_token': template.attendee_token,
     'version': template.version,
     'schedule_list': [
       // like one
